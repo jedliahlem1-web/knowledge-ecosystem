@@ -1,12 +1,21 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 import asyncio
 import json
+import os
 from datetime import datetime
 
 app = FastAPI(title="Apex Multi-Agent Elite Research Ecosystem")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/", response_class=HTMLResponse)
+async def read_index():
+    if os.path.exists("static/index.html"):
+        with open("static/index.html", "r", encoding="utf-8") as f:
+            return f.read()
+    return "<h2>Apex Multi-Agent Ecosystem Active. Please check static/index.html.</h2>"
 
 SHARED_MEMORY = {
     "discoveries": [],
@@ -46,12 +55,10 @@ class EliteAgent:
 
     async def perform_deep_research(self, goal: str):
         SHARED_MEMORY["agents_status"][self.name]["status"] = "Deep Research & Self-Correction"
-        await asyncio.sleep(1.5)
+        await asyncio.sleep(1.0)
         
-        # محاكاة الاستدلال فائق التخصص مع المراجعة الذاتية
         refined_insight = f"Autonomous elite synthesis by {self.name} ({self.domain}): Solved frontier parameters for '{goal}' using self-corrected peer-reviewed protocols."
         
-        # تقييم النتيجة عبر محرك الأهمية
         evaluation = BreakthroughEvaluator.evaluate(self.domain, goal + " " + refined_insight)
         
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -72,7 +79,6 @@ class EliteAgent:
         SHARED_MEMORY["agents_status"][self.name]["status"] = "Idle"
         return record
 
-# تعريف النخبة العالمية بلا منافس
 math_agent = EliteAgent("Euler-X", "Mathematics & Topology", "Unsolved Equations & Frontier Topology")
 physics_agent = EliteAgent("Quantum-AI", "Theoretical Physics", "Quantum Gravity & Unified Field Theory")
 chem_agent = EliteAgent("Molecule-Master", "Advanced Chemistry", "Molecular Design & Synthetic Therapeutics")
@@ -116,7 +122,6 @@ async def websocket_endpoint(websocket: WebSocket):
             for agent in agents:
                 result = await agent.perform_deep_research(query)
                 
-                # توجيه إشعار خاص وفوري إذا كان إنجازاً تاريخياً خارقاً
                 if result["type"] == "HISTORIC_BREAKTHROUGH":
                     await manager.broadcast({
                         "type": "SPECIAL_PRIORITY_ALERT",
@@ -128,9 +133,8 @@ async def websocket_endpoint(websocket: WebSocket):
                         "type": "AGENT_DISCOVERY",
                         "data": result
                     })
-                await asyncio.sleep(0.4)
+                await asyncio.sleep(0.3)
                 
-            # غرفة القرار التشاركي الجماعي (Apex Consensus)
             consensus_record = {
                 "type": "APEX_CONSENSUS",
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -139,5 +143,5 @@ async def websocket_endpoint(websocket: WebSocket):
             SHARED_MEMORY["consensus_logs"].append(consensus_record)
             await manager.broadcast(consensus_record)
                 
-        except WebSocketDisconnect:
-            manager.disconnect(websocket)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
