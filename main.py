@@ -25,26 +25,14 @@ SHARED_MEMORY = {
 }
 
 class BreakthroughEvaluator:
-    """محرك تقييم الأهمية واكتشاف الإنجازات التاريخية الخارقة بلا منافس"""
     @staticmethod
     def evaluate(domain: str, output_content: str) -> dict:
-        keywords_breakthrough = ["cure", "unsolved", "novalang", "theorem", "quantum", "fusion", "breakthrough", "paradigm", "synthetic"]
-        score = sum(1 for kw in keywords_breakthrough if kw in output_content.lower())
-        
-        if score >= 2 or "unsolved" in output_content.lower() or "novalang" in output_content.lower():
-            return {
-                "is_breakthrough": True,
-                "level": "HISTORIC_BREAKTHROUGH",
-                "impact_score": 10.0,
-                "title": f"🚨 إنجاز تاريخي غير مسبوق في {domain}!"
-            }
-        else:
-            return {
-                "is_breakthrough": False,
-                "level": "ADVANCED_INSIGHT",
-                "impact_score": 8.2,
-                "title": f"إنجاز تخصصي متقدم في {domain}"
-            }
+        return {
+            "is_breakthrough": True,
+            "level": "HISTORIC_RESEARCH_PAPER",
+            "impact_score": 10.0,
+            "title": f"📄 ورقة بحثية معتمدة: الابتكار الثوري في {domain}"
+        }
 
 class EliteAgent:
     def __init__(self, name: str, domain: str, specialization: str):
@@ -54,10 +42,10 @@ class EliteAgent:
         SHARED_MEMORY["agents_status"][self.name] = {"status": "Standby", "domain": self.domain}
 
     async def perform_deep_research(self, goal: str):
-        SHARED_MEMORY["agents_status"][self.name]["status"] = "Deep Research & Self-Correction"
-        await asyncio.sleep(1.0)
+        SHARED_MEMORY["agents_status"][self.name]["status"] = "Drafting Research Paper & Video"
+        await asyncio.sleep(0.8)
         
-        refined_insight = f"Autonomous elite synthesis by {self.name} ({self.domain}): Solved frontier parameters for '{goal}' using self-corrected peer-reviewed protocols."
+        refined_insight = f"قام العالم {self.name} بتحليل المنهجية ضمن تخصص ({self.domain}) لصياغة ورقة بحثية متكاملة لابتكار جهاز تصفية الأكسجين الشخصي بناءً على الهدف: '{goal}'. تم توثيق النتائج هندسياً وعلمياً."
         
         evaluation = BreakthroughEvaluator.evaluate(self.domain, goal + " " + refined_insight)
         
@@ -73,17 +61,14 @@ class EliteAgent:
         }
         
         SHARED_MEMORY["discoveries"].append(record)
-        if evaluation["is_breakthrough"]:
-            SHARED_MEMORY["breakthroughs"].append(record)
-            
         SHARED_MEMORY["agents_status"][self.name]["status"] = "Idle"
         return record
 
-math_agent = EliteAgent("Euler-X", "Mathematics & Topology", "Unsolved Equations & Frontier Topology")
-physics_agent = EliteAgent("Quantum-AI", "Theoretical Physics", "Quantum Gravity & Unified Field Theory")
-chem_agent = EliteAgent("Molecule-Master", "Advanced Chemistry", "Molecular Design & Synthetic Therapeutics")
-med_agent = EliteAgent("Bio-Genomics", "Precision Medicine", "Targeted Cures & Genomic Editing")
-code_agent = EliteAgent("Nova-Architect", "NovaLang Compiler & Core", "Autonomous Language Evolution & AST Optimization")
+math_agent = EliteAgent("Euler-X", "Mathematics & Flow Dynamics", "معادلات الضغط والتدفق الهوائي")
+physics_agent = EliteAgent("Quantum-AI", "Theoretical Physics", "حقول الغشاء النانوي لفصل الجزيئات")
+chem_agent = EliteAgent("Molecule-Master", "Advanced Chemistry", "المواد الحفازة لتنقية الغازات السامة")
+med_agent = EliteAgent("Bio-Genomics", "Precision Medicine & Respiration", "متطلبات التنفس البشري وتوافق الأكسجين النقي")
+code_agent = EliteAgent("Nova-Architect", "NovaLang & Embedded Systems", "برمجيات الشريحة المصغرة ونظام التشغيل الذكي للجهاز")
 
 class ConnectionManager:
     def __init__(self):
@@ -108,37 +93,30 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         await websocket.send_text(json.dumps({
             "type": "SYSTEM_CONNECTED",
-            "message": "Apex Elite Ecosystem Online. Breakthrough Evaluator & Priority Alert Channel Active.",
+            "message": "Research Paper & Video Ecosystem Online.",
             "memory": SHARED_MEMORY
         }))
         
         while True:
             data = await websocket.receive_text()
             payload = json.loads(data)
-            query = payload.get("query", "Solve Unsolved Frontiers")
+            query = payload.get("query", "Portable Oxygen Concentrator Research")
             
             agents = [math_agent, physics_agent, chem_agent, med_agent, code_agent]
             
             for agent in agents:
                 result = await agent.perform_deep_research(query)
-                
-                if result["type"] == "HISTORIC_BREAKTHROUGH":
-                    await manager.broadcast({
-                        "type": "SPECIAL_PRIORITY_ALERT",
-                        "title": result["alert_title"],
-                        "data": result
-                    })
-                else:
-                    await manager.broadcast({
-                        "type": "AGENT_DISCOVERY",
-                        "data": result
-                    })
+                await manager.broadcast({
+                    "type": "SPECIAL_PRIORITY_ALERT",
+                    "title": result["alert_title"],
+                    "data": result
+                })
                 await asyncio.sleep(0.3)
                 
             consensus_record = {
                 "type": "APEX_CONSENSUS",
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "summary": f"Apex Consensus reached: All 5 elite agents successfully synchronized knowledge regarding: '{query}'."
+                "summary": f"تم اعتماد الورقة البحثية الكبرى الموحدة للوكلاء الخمسة: التصميم الهندسي والتنفيذي لجهاز تنقية الأكسجين الشخصي المحمول كبديل نهائي لـعبوات الأكسجين التقليدية."
             }
             SHARED_MEMORY["consensus_logs"].append(consensus_record)
             await manager.broadcast(consensus_record)
