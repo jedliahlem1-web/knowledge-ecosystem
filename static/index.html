@@ -37,9 +37,8 @@
     </div>
 
     <script>
-        // ضبط بروتوكول الاتصال تلقائياً ليتوافق مع السحابة
-        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-        const ws = new WebSocket(protocol + window.location.host + '/ws');
+        // الاتصال المباشر والمضبوط بالرابط السحابي
+        const ws = new WebSocket('wss://multi-agent-ecosystem-r8yh.onrender.com/ws');
         const bookLog = document.getElementById("bookLog");
 
         ws.onopen = () => {
