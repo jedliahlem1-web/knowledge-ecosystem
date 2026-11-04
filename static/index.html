@@ -3,70 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apex Elite Multi-Agent Ecosystem</title>
+    <title>منظومة الأبحاث الكبرى - أوراق بحثية وفيديوهات توضيحية</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1117; color: #c9d1d9; margin: 0; padding: 20px; }
-        h1 { color: #58a6ff; text-align: center; }
-        .container { max-width: 900px; margin: auto; }
-        .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .alert-box { background: #8957e5; color: #fff; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: none; animation: fadeIn 0.5s; }
-        button { background: #238636; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 6px; cursor: pointer; }
-        button:hover { background: #2ea043; }
-        pre { background: #010409; padding: 10px; border-radius: 5px; overflow-x: auto; color: #7ee787; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        body { background-color: #0b0f19; color: #f3f4f6; font-family: Tahoma, sans-serif; padding: 20px; margin: 0; }
+        h1 { text-align: center; color: #60a5fa; }
+        .card { background: #1f2937; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        textarea { width: 100%; padding: 10px; background: #374151; border: 1px solid #4b5563; color: white; border-radius: 8px; margin-top: 10px; box-sizing: border-box; }
+        button { background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; }
+        button:hover { background: #059669; }
+        .book-container { display: flex; flex-direction: column; gap: 20px; max-height: 600px; overflow-y: auto; padding-right: 5px; }
+        .research-paper { background: #111827; border-right: 6px solid #3b82f6; padding: 20px; border-radius: 8px; }
+        .research-paper h3 { margin-top: 0; color: #93c5fd; }
+        .paper-section { background: #1f2937; padding: 10px 15px; border-radius: 6px; margin-top: 10px; font-size: 14px; line-height: 1.6; }
+        .agent-video { width: 100%; max-height: 250px; border-radius: 6px; margin-top: 15px; border: 1px solid #374151; object-fit: cover; }
+        .status-badge { display: inline-block; padding: 4px 10px; background: #374151; border-radius: 4px; font-size: 12px; color: #34d399; margin-bottom: 8px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>منظومة الوكلاء النخبويين الخارقة</h1>
-        
-        <!-- نافذة التنبيه الخاصة بالإنجازات التاريخية (بدون صوت) -->
-        <div id="popupAlert" class="alert-box">
-            <h3 id="alertTitle">🚨 تنبيه إنجاز تاريخي!</h3>
-            <p id="alertDesc"></p>
-        </div>
 
-        <div class="card">
-            <h3>إرسال مهمة بحثية كبرى للوكلاء</h3>
-            <input type="text" id="queryInput" value="Solve unsolved Navier-Stokes equations and evolve NovaLang core." style="width: 70%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 4px;">
-            <button onclick="sendQuery()">بدء الأبحاث المكثفة</button>
-        </div>
+    <h1>منظومة الوكلاء النخبويين - الأوراق البحثية والفيديوهات التوضيحية</h1>
 
-        <div class="card">
-            <h3>سجل الاكتشافات والأحداث الحية (WebSocket)</h3>
-            <pre id="logArea">جاري الاتصال بالنظام...</pre>
+    <div class="card">
+        <h3>مهمة الوكلاء الكبرى: ابتكار جهاز تنقية الأكسجين المحمول</h3>
+        <textarea id="queryInput" rows="3">دمج جهود الوكلاء لتصميم ورقة بحثية ونموذج مرئي لجهاز مصغر يرتدى لتصفية الهواء واستخلاص الأكسجين مباشرة كبديل لعبوات الأكسجين</textarea>
+        <button onclick="startResearch()">بدء الأبحاث وإصدار الأوراق البحثية والفيديوهات</button>
+    </div>
+
+    <div class="card">
+        <h3>سجل الأوراق البحثية والفيديوهات التوضيحية 🎥📖</h3>
+        <div id="bookLog" class="book-container">
+            <div class="research-paper">جاري الاتصال بالنظام واستعداد الوكلاء لإعداد الأوراق والفيديوهات...</div>
         </div>
     </div>
 
     <script>
-        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws`);
-        const logArea = document.getElementById('logArea');
-        const popupAlert = document.getElementById('popupAlert');
-        const alertTitle = document.getElementById('alertTitle');
-        const alertDesc = document.getElementById('alertDesc');
+        // ضبط بروتوكول الاتصال تلقائياً ليتوافق مع السحابة
+        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const ws = new WebSocket(protocol + window.location.host + '/ws');
+        const bookLog = document.getElementById("bookLog");
 
-        ws.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            
-            // التعامل مع الإشعارات الخاصة للاكتشافات التاريخية غير المسبوقة (بدون أصوات)
-            if (data.type === "SPECIAL_PRIORITY_ALERT") {
-                alertTitle.innerText = data.title;
-                alertDesc.innerText = `${data.data.agent} (${data.data.domain}): ${data.data.details}`;
-                popupAlert.style.display = "block";
-                
-                // إخفاء التنبيه تلقائياً بعد 8 ثوانٍ
-                setTimeout(() => {
-                    popupAlert.style.display = "none";
-                }, 8000);
-            }
-
-            logArea.innerText = JSON.stringify(data, null, 2) + "\n\n" + logArea.innerText;
+        ws.onopen = () => {
+            bookLog.innerHTML = `<div class="research-paper"><h3>النظام متصل بنجاح 🟢</h3><p>الوكلاء في قمة الاستعداد لتنفيذ مهام دمج الأكسجين المحمول وإعداد الأوراق البحثية.</p></div>`;
         };
 
-        function sendQuery() {
-            const query = document.getElementById('queryInput').value;
-            ws.send(JSON.stringify({ query: query }));
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            if (data.type === "AGENT_DISCOVERY" || data.type === "SPECIAL_PRIORITY_ALERT") {
+                const item = data.data || data;
+                const paperDiv = document.createElement("div");
+                paperDiv.className = "research-paper";
+                
+                let demoVideo = "https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-and-code-31932-large.mp4";
+                if(item.domain && item.domain.includes("Physics")) {
+                    demoVideo = "https://assets.mixkit.co/videos/preview/mixkit-futuristic-technology-interface-screen-41527-large.mp4";
+                } else if(item.domain && item.domain.includes("Medicine")) {
+                    demoVideo = "https://assets.mixkit.co/videos/preview/mixkit-plexus-network-of-nodes-and-connections-41551-large.mp4";
+                }
+
+                paperDiv.innerHTML = `
+                    <span class="status-badge">${item.domain || 'التخصص العام'}</span>
+                    <h3>${item.alert_title || item.type}</h3>
+                    <div class="paper-section">
+                        <strong>الوكيل المسؤول:</strong> ${item.agent} <br>
+                        <strong>ملخص الورقة البحثية:</strong> ${item.details}
+                    </div>
+                    <div class="paper-section">
+                        <strong>درجة التأثير والأهمية:</strong> ${item.impact_score}/10
+                    </div>
+                    <div>
+                        <p style="margin-top: 15px; font-weight: bold; color: #60a5fa;">فيديو توضيحي لشرح الاكتشاف والآلية:</p>
+                        <video class="agent-video" controls autoplay loop muted>
+                            <source src="${demoVideo}" type="video/mp4">
+                            متصفحك لا يدعم عرض الفيديو.
+                        </video>
+                    </div>
+                `;
+                bookLog.prepend(paperDiv);
+            } else if (data.type === "APEX_CONSENSUS") {
+                const paperDiv = document.createElement("div");
+                paperDiv.className = "research-paper";
+                paperDiv.style.borderRightColor = "#10b981";
+                paperDiv.innerHTML = `
+                    <span class="status-badge" style="color: #60a5fa;">غرفة القرار التشاركي (Apex Consensus)</span>
+                    <h3>التقرير الختامي الشامل لدمج الوكلاء</h3>
+                    <p class="paper-section">${data.summary}</p>
+                `;
+                bookLog.prepend(paperDiv);
+            }
+        };
+
+        ws.onerror = (error) => {
+            bookLog.innerHTML = `<div class="research-paper" style="border-right-color: #ef4444;"><h3>خطأ في الاتصال</h3><p>تعذر إنشاء قناة WebSocket. يرجى التأكد من استيقاظ خادم Render وتحديث الصفحة.</p></div>`;
+        };
+
+        function startResearch() {
+            const query = document.getElementById("queryInput").value;
+            if(ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ query: query }));
+                bookLog.innerHTML = `<div class="research-paper"><h3>جاري إرسال المهمة للوكلاء...</h3><p>بدء العمل التشاركي لصياغة الأوراق البحثية المرئية.</p></div>` + bookLog.innerHTML;
+            } else {
+                alert("الاتصال غير متصل حالياً، يرجى تحديث الصفحة.");
+            }
         }
     </script>
 </body>
