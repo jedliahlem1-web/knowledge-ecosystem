@@ -20,10 +20,8 @@ async def get_index():
     return "<h1>منظومة الوكلاء النخبويين تعمل بنجاح</h1>"
 
 # ==========================================
-# تعريف الوكلاء (بin ضمنهم الوكيلان الجديدان)
+# تعريف الوكلاء (الباحث + المهندس + البيولوجي)
 # ==========================================
-
-# 1. وكيل البحث العام
 researcher_agent = Agent(
     role='باحث رئيسي متقدم',
     goal='جمع أحدث المعلومات وتحليلها بدقة لضمان شمولية الأبحاث.',
@@ -32,7 +30,6 @@ researcher_agent = Agent(
     allow_delegation=True
 )
 
-# 2. وكيل الهندسة الكهربائية والميكانيكية (جديد - يتعلم ويبحث بعمق)
 electrical_mechanical_agent = Agent(
     role='خبير وباحث متقدم في الهندسة الكهربائية والميكانيكية',
     goal='إجراء أبحاث شاملة، وتحليل، وتعلم كل التفاصيل والابتكارات المتعلقة بالأنظمة الكهربائية، الدوائر، الميكانيكا، وتكامل الأجهزة.',
@@ -41,7 +38,6 @@ electrical_mechanical_agent = Agent(
     allow_delegation=True
 )
 
-# 3. وكيل علم الأحياء والتقنية الحيوية (جديد - يتعلم ويبحث بعمق)
 biology_agent = Agent(
     role='خبير وباحث متقدم في علم الأحياء والتقنية الحيوية',
     goal='البحث والتققصي المستمر في التفاعلات البيولوجية، الكيمياء الحيوية، والعلوم الحيوية لفهم وتحليل كافة تفاصيل التخصص.',
@@ -62,9 +58,8 @@ async def websocket_endpoint(websocket: WebSocket):
             message_data = json.loads(data)
             user_prompt = message_data.get("prompt", "مهمة بحثية جديدة")
             
-,            await websocket.send_text(json.dumps({"status": "info", "message": "تم استلام المهمة وجاري تشغيل الوكلاء..."}))
+            await websocket.send_text(json.dumps({"status": "info", "message": "تم استلام المهمة وجاري تشغيل الوكلاء..."}))
             
-            # تحديد المهام للوكلاء بناءً على المدخلات
             task_research = Task(
                 description=f'إجراء بحث شامل حول: {user_prompt}',
                 expected_output='تقرير بحثي أولي مفصل.',
@@ -83,7 +78,6 @@ async def websocket_endpoint(websocket: WebSocket):
                 agent=biology_agent
             )
             
-            # تجميع الفريق وبدء التنفيذ
             crew = Crew(
                 agents=[researcher_agent, electrical_mechanical_agent, biology_agent],
                 tasks=[task_research, task_eng, task_bio],
@@ -91,7 +85,6 @@ async def websocket_endpoint(websocket: WebSocket):
                 verbose=True
             )
             
-            # تنفيذ العمليات بشكل غير متزامن
             result = crew.kickoff()
             
             await websocket.send_text(json.dumps({
