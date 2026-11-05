@@ -2,10 +2,5 @@ services:
   - type: web
     name: multi-agent-ecosystem
     env: python
-    region: frankfurt
-    plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn main:main --host 0.0.0.0 --port $PORT"
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.10.0
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
