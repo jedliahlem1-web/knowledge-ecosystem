@@ -100,13 +100,12 @@
 </div>
 
 <script>
-    // دالة بدء البحث في الخلفية (POST)
     async function startResearch() {
         const prompt = document.getElementById("promptInput").value;
         const statusBox = document.getElementById("statusBox");
         
         statusBox.style.display = "block";
-        statusBox.innerHTML = "🚀 تم إرسال المهمة! الوكلاء يعملون الآن في الخلفية... يمكنك إغلاق الصفحة والعودة في أي وقت.";
+        statusBox.innerHTML = "🚀 جاري إرسال المهمة للوكلاء في الخلفية...";
 
         try {
             const response = await fetch('/start-research', {
@@ -115,16 +114,14 @@
                 body: JSON.stringify({ prompt: prompt })
             });
             const data = await response.json();
-            statusBox.innerHTML = "✅ " + data.message;
+            statusBox.innerHTML = "✅ " + (data.message || "تم بدء المهمة في الخلفية بنجاح!");
             
-            // تحديث السجل بعد ثانيتين
             setTimeout(fetchResults, 2000);
         } catch (error) {
             statusBox.innerHTML = "⚠️ حدث خطأ أثناء التواصل مع الخادم: " + error;
         }
     }
 
-    // دالة جلب الأبحاث المحفوظة في السجل (GET)
     async function fetchResults() {
         try {
             const response = await fetch('/get-results');
@@ -153,7 +150,6 @@
         }
     }
 
-    // جلب النتائج تلقائياً عند فتح الصفحة وتحديثها كل 10 ثوانٍ
     fetchResults();
     setInterval(fetchResults, 10000);
 </script>
