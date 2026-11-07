@@ -8,10 +8,8 @@ from crewai import Agent, Task, Crew, Process
 
 app = FastAPI()
 
-# خدمة الملفات الثابتة (واجهة المستخدم)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# ملف الذاكرة التراكمية لحفظ تاريخ التعلم المستمر
 KNOWLEDGE_FILE = "continuous_knowledge_ledger.json"
 
 def load_knowledge():
@@ -42,69 +40,6 @@ async def get_index():
             return f.read()
     return "<h1>منظومة التعلم الذاتي التراكمي تعمل بنجاح تام</h1>"
 
-# ==========================================
-# تعريف الوكلاء النخبويين للتعلم التراكمي المستمر
-# ==========================================
-
-researcher_agent = Agent(
-    role='باحث رئيسي ومنسق التعلم الذاتي',
-    goal='متابعة حلقات التعلم المستمر بين جميع الوكلاء وتوثيق الاكتشافات العابرة للتخصصات.',
-    backstory='محلل استراتيجي يسجل التطور التراكمي للعلوم ويتحقق من الترابط بين التخصصات.',
-    verbose=True,
-    allow_delegation=True
-)
-
-math_agent = Agent(
-    role='عالم الرياضيات التطبيقية والتعلم التراكمي التاريخي',
-    goal='دراسة التطور التاريخي للرياضيات، البناء على أبحاث العلماء السابقين، وابتكار نماذج رياضية جديدة لم تحل من قبل.',
-    backstory='عالم رياضيات يدرس كيف استكمل كل عالم أبحاث من سبقه، ويسعى لحل الفجوات الحسابية والمعادلات المعقدة.',
-    verbose=True,
-    allow_delegation=True
-)
-
-physics_agent = Agent(
-    role='فيزيائي النظريات والتعلم المستمر',
-    goal='تتبع تاريخ الفيزياء من الميكانيكا الكلاسيكية إلى الكم، وتطوير قوانين ديناميكية جديدة للتحكم بالطاقة.',
-    backstory='فيزيائي متخصص في دراسة تسلسل الاكتشافات النظرية وتجاوز حدود المعرفة الفيزيائية الحالية.',
-    verbose=True,
-    allow_delegation=True
-)
-
-chemistry_agent = Agent(
-    role='خبير الكيمياء التراكمية وعلم المواد المتقدم',
-    goal='دراسة تطور المواد والمرشحات كيميائياً عبر التاريخ، واكتشاف مرشحات ومواد جديدة ذاتية الإصلاح والترشيح.',
-    backstory='كيميائي يربط بين التاريخ الكيميائي وتطبيقات النانو التكنولوجية والحلول غير المسبوقة.',
-    verbose=True,
-    allow_delegation=True
-)
-
-biology_agent = Agent(
-    role='عالم الأحياء والطب التراكمي',
-    goal='متابعة التطور التاريخي للعلوم الطبية والوراثية لضمان التوافق الحيوي والأمان التام للأنظمة البشرية.',
-    backstory='باحث طبي يدرس تطور فهم جسم الإنسان لتقديم معايير صحية آمنة ومبتكرة.',
-    verbose=True,
-    allow_delegation=True
-)
-
-programming_cyber_agent = Agent(
-    role='مهندس البرمجيات، الأمن السيبراني، ومبتكر لغات البرمجة',
-    goal='دراسة نشأة لغات البرمجة، معالجة ثغرات الأمان السيبراني تاريخياً، وصياغة وتطوير لغة برمجة جديدة كلياً خالية من الثغرات ومخصصة للذكاء الاصطناعي.',
-    backstory='مبتكر لغات برمجية وخبراء أمن سيبراني، مهمته تأسيس لغة برمجة ذات جيل جديد بناءً على تاريخ تطوير Software Development.',
-    verbose=True,
-    allow_delegation=True
-)
-
-electrical_mechanical_agent = Agent(
-    role='خبير التراكم الهندسي والتكامل الميكانيكي',
-    goal='تحويل النظريات المبتكرة من باقي الوكلاء إلى نماذج هندسية ملموسة وتصاميم ميكانيكية وكهربائية ذكية.',
-    backstory='مهندس يجمع بين التراث الهندسي البشري وأحدث تقنيات التصنيع والتكامل الذكي.',
-    verbose=True,
-    allow_delegation=True
-)
-
-# ==========================================
-# مسار الاتصال المباشر الـ WebSocket
-# ==========================================
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -114,83 +49,54 @@ async def websocket_endpoint(websocket: WebSocket):
             message_data = json.loads(data)
             user_prompt = message_data.get("prompt", "بدء حلقة التعلم التراكمي واكتشاف الابتكارات")
             
-            # تحميل سجل المعرفة الحالي
             ledger = load_knowledge()
             
             await websocket.send_text(json.dumps({
                 "status": "info", 
-                "message": "🧠 تفعيل بروتوكول التعلم التراكمي المستمر! يجري الآن دمج تاريخ العلوم لابتكار حلول ولغة برمجة جديدة..."
+                "message": "🧠 بدأ فريق النخبة عمليات التعلم والتطوير في الخلفية، يرجى الانتظار..."
             }))
             
-            # صياغة المهام التراكمية
-            t_math = Task(
-                description=f'بناءً على المعرفة السابقة ({ledger["math_history"]})، ادرس النقطة التاريخية التالية، وطوّر قانوناً أو نموذجاً رياضياً جديداً يدعم: {user_prompt}',
-                expected_output='إنجاز رياضي تراكمي ونموذج حسابي مبتكر.',
-                agent=math_agent
-            )
-            
-            t_prog = Task(
-                description=f'بناءً على تاريخ اللغات ({ledger["programming_history"]}) والامنية السيبرانية، صغ قواعد ومفاهيم النواة للغة البرمجة الجديدة والمحمية سيبرانياً والمخصصة لـ: {user_prompt}',
-                expected_output='قواعد النحو والأنماط الأساسية للغة البرمجة الجديدة وإنجاز أمني استثنائي.',
-                agent=programming_cyber_agent
-            )
-            
-            t_phys = Task(
-                description=f'تطوير فهم فيزيائي جديد مبني على القوانين الحالية لدعم: {user_prompt}',
-                expected_output='تحليل فيزيائي ديناميكي مبتكر.',
-                agent=physics_agent
-            )
-            
-            t_chem = Task(
-                description=f'ابتكار مادة كيميائية أو مرشح نانوي متطور لدعم المشروع: {user_prompt}',
-                expected_output='تقرير الكيمياء والمواد المبتكرة.',
-                agent=chemistry_agent
-            )
-            
-            t_bio = Task(
-                description=f'تحدديد معايير السلامة والتوافق البيولوجي الجيني والتنفسي لـ: {user_prompt}',
-                expected_output='تقرير الأمان الحيوي والطب التراكمي.',
-                agent=biology_agent
-            )
-            
-            t_eng = Task(
-                description=f'دمج الابتكارات السابقة في نموذج هندسي ميكانيكي وكهربائي متكامل لـ: {user_prompt}',
-                expected_output='تصميم هندسي متكامل للنموذج الأولي.',
-                agent=electrical_mechanical_agent
-            )
-            
-            t_res = Task(
-                description=f'تجميع كافة الإنجازات الاستثنائية وتلخيص الورقة البحثية الشاملة واختراع لغة البرمجة لـ: {user_prompt}',
-                expected_output='تقرير استثنائي شامل يبرز الإنجاز المبتكر لكل وكيل.',
-                agent=researcher_agent
-            )
-            
+            # تعريف الوكلاء
+            researcher_agent = Agent(role='باحث رئيسي ومنسق التعلم الذاتي', goal='متابعة حلقات التعلم المستمر وتوثيق الاكتشافات.', backstory='محلل استراتيجي.', verbose=True, allow_delegation=True)
+            math_agent = Agent(role='عالم الرياضيات التطبيقية', goal='تطوير نماذج رياضية جديدة.', backstory='عالم رياضيات.', verbose=True, allow_delegation=True)
+            physics_agent = Agent(role='فيزيائي النظريات', goal='تطوير قوانين ديناميكية جديدة.', backstory='فيزيائي.', verbose=True, allow_delegation=True)
+            chemistry_agent = Agent(role='خبير الكيمياء التراكمية', goal='ابتكار مواد ومرشحات جديدة.', backstory='كيميائي.', verbose=True, allow_delegation=True)
+            biology_agent = Agent(role='عالم الأحياء والطب', goal='ضمان الأمان الحيوي.', backstory='باحث طبي.', verbose=True, allow_delegation=True)
+            programming_cyber_agent = Agent(role='مهندس البرمجيات والأمن السيبراني ومبتكر لغات البرمجة', goal='صياغة لغة برمجة جديدة ومحمية.', backstory='مبتكر لغات.', verbose=True, allow_delegation=True)
+            electrical_mechanical_agent = Agent(role='خبير التكامل الهندسي', goal='تحويل النظريات لنماذج ملموسة.', backstory='مهندس.', verbose=True, allow_delegation=True)
+
+            t_math = Task(description=f'بناءً على المعرفة ({ledger["math_history"]}): طوّر نموذجاً رياضياً لـ {user_prompt}', expected_output='نموذج رياضي.', agent=math_agent)
+            t_prog = Task(description=f'بناءً على تاريخ اللغات ({ledger["programming_history"]}): صغ قواعد ونواة لغة البرمجة الجديدة لـ {user_prompt}', expected_output='قواعد اللغة البرمجية الجديدة.', agent=programming_cyber_agent)
+            t_phys = Task(description=f'تحليل فيزيائي ديناميكي لـ {user_prompt}', expected_output='تحليل فيزيائي.', agent=physics_agent)
+            t_chem = Task(description=f'ابتكار مادة أو مرشح نانوي لـ {user_prompt}', expected_output='تقرير كيميائي.', agent=chemistry_agent)
+            t_bio = Task(description=f'معايير السلامة والتوافق الحيوي لـ {user_prompt}', expected_output='تقرير بيولوجي.', agent=biology_agent)
+            t_eng = Task(description=f'تصميم هندسي ميكانيكي وكهربائي لـ {user_prompt}', expected_output='تصميم هندسي.', agent=electrical_mechanical_agent)
+            t_res = Task(description=f'تجميع كافة النتائج وصياغة الورقة البحثية الكبرى لـ {user_prompt}', expected_output='تقرير شامل نهائي.', agent=researcher_agent)
+
             crew = Crew(
-                agents=[
-                    math_agent, 
-                    programming_cyber_agent, 
-                    physics_agent, 
-                    chemistry_agent, 
-                    biology_agent, 
-                    electrical_mechanical_agent, 
-                    researcher_agent
-                ],
+                agents=[math_agent, programming_cyber_agent, physics_agent, chemistry_agent, biology_agent, electrical_mechanical_agent, researcher_agent],
                 tasks=[t_math, t_prog, t_phys, t_chem, t_bio, t_eng, t_res],
                 process=Process.sequential,
                 verbose=True
             )
             
-            result = crew.kickoff()
-            
-            # تحديث وتحديث سجل المعرفة للتكرار القادم
-            ledger["math_history"] += " -> تم دمج نموذج الرياضيات المتقدم"
-            ledger["programming_history"] += " -> تم صياغة الجيل الجديد للغة البرمجة والمُحكم سيبرانياً"
-            save_knowledge(ledger)
-            
-            await websocket.send_text(json.dumps({
-                "status": "complete", 
-                "result": str(result)
-            }))
+            try:
+                # تشغيل المهمة بشكل غير متزامن لعدم تجميد السيرفر
+                result = await asyncio.to_thread(crew.kickoff)
+                
+                ledger["math_history"] += " -> تم دمج نموذج الرياضيات"
+                ledger["programming_history"] += " -> تم تحديث لغة البرمجة"
+                save_knowledge(ledger)
+                
+                await websocket.send_text(json.dumps({
+                    "status": "complete", 
+                    "result": str(result)
+                }))
+            except Exception as e:
+                await websocket.send_text(json.dumps({
+                    "status": "complete", 
+                    "result": f"⚠️ تنبيه من النظام: حدث خطأ أثناء تشغيل الوكلاء (تأكد من صلاحية مفتاح OpenAI API): {str(e)}"
+                }))
             
     except WebSocketDisconnect:
         print("تم قطع الاتصال")
